@@ -1,0 +1,23 @@
+# Never commit real secrets
+.env
+.env.local
+*.env
+
+# Dependencies
+node_modules/
+backend/node_modules/
+mobile/node_modules/
+
+# Expo / mobile build artifacts
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# OS / editor cruft
+.DS_Store
+*.log
