@@ -7,14 +7,14 @@ const walletService = require("../services/walletService");
 const router = express.Router();
 
 // ── OTP ──────────────────────────────────────────────────────────────────
+// Kept around but no longer required for signup — see below. Left in place
+// in case you want phone verification back later without rebuilding it.
 router.post("/otp/request", asyncHandler(async (req, res) => {
   const { phone, purpose } = req.body;
   if (!phone) return res.status(400).json({ error: "phone is required" });
   const devCode = await auth.createOtp(phone, purpose || "signup");
   res.json({
     message: "OTP sent",
-    // Only present outside production, and only because no SMS provider is
-    // configured yet — see services/authService.js createOtp().
     devCode,
   });
 }));
@@ -29,7 +29,7 @@ router.post("/otp/verify", asyncHandler(async (req, res) => {
 
 // ── Signup ───────────────────────────────────────────────────────────────
 router.post("/signup", asyncHandler(async (req, res) => {
-  const { phone, email, password, role, name, otpCode } = req.body;
+  const { phone, email, password, role, name } = req.body;
   if (!phone || !password || !role || !name) {
     return res.status(400).json({ error: "phone, password, role and name are required" });
   }
@@ -37,12 +37,7 @@ router.post("/signup", asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'role must be "rider" or "driver"' });
   }
 
-  // Require a verified OTP before creating the account — this is what
-  // makes phone the real trust anchor, not just a form field.
-  const otpValid = await auth.verifyOtp(phone, otpCode, "signup");
-  if (!otpValid) {
-    return res.status(400).json({ error: "Phone number not verified. Request and verify an OTP first." });
-  }
+  // No OTP verification — phone is taken at face value.
 
   const user = await auth.createUser({ phone, email, password, role });
 
@@ -58,9 +53,6 @@ router.post("/signup", asyncHandler(async (req, res) => {
       `INSERT INTO drivers (user_id, legal_name, wallet_id) VALUES ($1, $2, $3)`,
       [user.id, name, wallet.id]
     );
-    // Driver verification documents (photo, ID, vehicle) are uploaded via
-    // POST /api/v1/drivers/:id/documents after this signup call — see
-    // routes/drivers.js. verification_status starts "pending" by default.
   }
 
   const accessToken = auth.signAccessToken(user);
