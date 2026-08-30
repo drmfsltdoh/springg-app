@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // computer need to reach this address. Use your LAN IP for local dev
 // (e.g. "http://192.168.1.42:3001") or your Render URL once deployed
 // (e.g. "https://spring-backend.onrender.com").
-export const BASE_URL = "https://spring-transport.onrender.com";
+export const BASE_URL = "https://springg-app.onrender.com";
 
 const TOKEN_KEY = "spring_access_token";
 const REFRESH_KEY = "spring_refresh_token";
